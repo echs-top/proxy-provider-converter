@@ -1,5 +1,7 @@
 # Proxy Provider Converter
 
+Fork from [qier222/proxy-provider-converter](https://github.com/qier222/proxy-provider-converter)
+
 一个可以将 Clash 订阅转换成 Proxy Provider 和 External Group(Surge) 的工具
 
 [https://proxy-provider-converter.vercel.app](https://proxy-provider-converter.vercel.app)
