@@ -1,17 +1,17 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { SelectorIcon, DuplicateIcon } from "@heroicons/react/outline";
 import toast, { Toaster } from "react-hot-toast";
 
-let host = "";
-if (typeof window !== "undefined") {
-  host = window.location.origin;
-}
-
 export default function Home() {
   const [url, setUrl] = useState("");
   const [target, setTarget] = useState("clash");
+  const [host, setHost] = useState('');
+
+  useEffect(() => {
+    setHost(window.location.origin);
+  }, []);
 
   const convertedUrl = `${host}/api/convert?url=${encodeURIComponent(
     url
