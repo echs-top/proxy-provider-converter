@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { SelectorIcon, DuplicateIcon } from "@heroicons/react/outline";
 import toast, { Toaster } from "react-hot-toast";
@@ -13,16 +13,18 @@ export default function Home() {
     setHost(window.location.origin);
   }, []);
 
-  const convertedUrl = `${host}/api/convert?url=${encodeURIComponent(
+  const convertedUrl = useMemo(() => `${host}/api/convert?url=${encodeURIComponent(
     url
-  )}&target=${target}`;
+  )}&target=${target}`, [host, url, target]);
 
-  let urlHost = "";
-  try {
-    urlHost = new URL(url).hostname;
-  } catch (error) {
-    // Ignore
-  }
+  const urlHost = useMemo(() => {
+    try {
+      return new URL(url).hostname;
+    } catch (error) {
+      // Ignore
+    }
+    return "";
+  }, [url]);
 
   const copiedToast = () =>
     toast("已复制", {
