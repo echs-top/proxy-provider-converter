@@ -180,11 +180,11 @@ ${urlHost || "egroup"} = select, policy-path=${convertedUrl}
             <li>
               1. 打开{" "}
               <a
-                href="https://github.com/qier222/proxy-provider-converter"
+                href="https://github.com/ycjcl868/proxy-provider-converter"
                 target="_blank"
                 className="text-yellow-600 transition hover:text-yellow-500"
               >
-                https://github.com/qier222/proxy-provider-converter
+                https://github.com/ycjcl868/proxy-provider-converter
               </a>
             </li>
             <li>2. 点击右上角的 Fork 按钮</li>
