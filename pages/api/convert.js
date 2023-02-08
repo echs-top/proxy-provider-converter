@@ -113,6 +113,7 @@ module.exports = async (req, res) => {
       }
     });
     const proxies = surgeProxies.filter((p) => p !== undefined);
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.status(200).send(proxies.join("\n"));
   } else {
     const proxies = config.proxies.filter(proxy => {
@@ -122,6 +123,7 @@ module.exports = async (req, res) => {
       return true;
     })
     const response = YAML.stringify({ proxies });
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.status(200).send(response);
   }
 };
