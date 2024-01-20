@@ -4,7 +4,7 @@ const axios = require("axios");
 module.exports = async (req, res) => {
   const url = req.query.url;
   const target = req.query.target;
-  const regions = req.query.region ? req.query.region.split(',') : [];
+  const regions = req.query.region ? req.query.region.split(",") : [];
   console.log(`query: ${JSON.stringify(req.query)}`);
   if (url === undefined) {
     res.status(400).send("Missing parameter: url");
@@ -18,12 +18,20 @@ module.exports = async (req, res) => {
       url,
       headers: {
         "User-Agent":
-          "ClashX Pro/1.72.0.4 (com.west2online.ClashXPro; build:1.72.0.4; macOS 12.0.1) Alamofire/5.4.4",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
       },
     });
     configFile = result.data;
   } catch (error) {
-    res.status(400).send(`Unable to get url, error: ${error}`);
+    res
+      .status(400)
+      .send(
+        `Unable to get url, error: ${error} ${
+          error.response && error.response.data
+            ? JSON.stringify(error.response.data)
+            : ""
+        }`
+      );
     return;
   }
 
@@ -113,17 +121,17 @@ module.exports = async (req, res) => {
       }
     });
     const proxies = surgeProxies.filter((p) => p !== undefined);
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.status(200).send(proxies.join("\n"));
   } else {
-    const proxies = config.proxies.filter(proxy => {
+    const proxies = config.proxies.filter((proxy) => {
       if (regions.length) {
-        return regions.some(region => proxy.server.includes(region));
+        return regions.some((region) => proxy.server.includes(region));
       }
       return true;
-    })
+    });
     const response = YAML.stringify({ proxies });
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.status(200).send(response);
   }
 };
