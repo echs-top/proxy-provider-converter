@@ -11,47 +11,44 @@ module.exports = async (req, res) => {
     return;
   }
 
-  console.log(`Fetching url: ${url}`);
-  let configFile = null;
+  console.log(`Fetching urls: ${url}`);
+  let allProxies = [];
   try {
-    const result = await axios({
-      url,
-      headers: {
-        "User-Agent":
-          "ClashX Pro/1.72.0.4 (com.west2online.ClashXPro; build:1.72.0.4; macOS 12.0.1) Alamofire/5.4.4",
-      },
+    const urls = url.split("|");
+    const fetchPromises = urls.map(async (singleUrl) => {
+      try {
+        const result = await axios({
+          url: singleUrl,
+          headers: {
+            "User-Agent":
+              "ClashX Pro/1.72.0.4 (com.west2online.ClashXPro; build:1.72.0.4; macOS 12.0.1) Alamofire/5.4.4",
+          },
+        });
+
+        const config = YAML.parse(result.data);
+        return config.proxies || [];
+      } catch (error) {
+        console.error(`Error fetching/parsing ${singleUrl}:`, error.message);
+        return [];
+      }
     });
-    configFile = result.data;
-  } catch (error) {
-    res
-      .status(400)
-      .send(
-        `Unable to get url, error: ${error} ${
-          error.response && error.response.data
-            ? JSON.stringify(error.response.data)
-            : ""
-        }`
-      );
-    return;
-  }
 
-  console.log(`Parsing YAML`);
-  let config = null;
-  try {
-    config = YAML.parse(configFile);
-    console.log(`👌 Parsed YAML`);
-  } catch (error) {
-    res.status(500).send(`Unable parse config, error: ${error}`);
-    return;
-  }
+    const results = await Promise.allSettled(fetchPromises);
+    allProxies = results
+      .filter((result) => result.status === "fulfilled")
+      .flatMap((result) => result.value);
 
-  if (config.proxies === undefined) {
-    res.status(400).send("No proxies in this config");
+    if (allProxies.length === 0) {
+      res.status(400).send("No valid proxies found in any of the configs");
+      return;
+    }
+  } catch (error) {
+    res.status(500).send(`Unexpected error: ${error.message}`);
     return;
   }
 
   if (target === "surge") {
-    const supportedProxies = config.proxies.filter((proxy) =>
+    const supportedProxies = allProxies.filter((proxy) =>
       ["ss", "vmess", "trojan"].includes(proxy.type)
     );
     const surgeProxies = supportedProxies.map((proxy) => {
@@ -124,7 +121,7 @@ module.exports = async (req, res) => {
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.status(200).send(proxies.join("\n"));
   } else {
-    const proxies = config.proxies.filter((proxy) => {
+    const proxies = allProxies.filter((proxy) => {
       if (regions.length) {
         return regions.some((region) => proxy.server.includes(region));
       }
