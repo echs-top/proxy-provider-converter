@@ -136,6 +136,80 @@ module.exports = async (req, res) => {
     const proxies = surgeProxies.filter((p) => p !== undefined);
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.status(200).send(proxies.join("\n"));
+  } else if (target === "quantumult-x" || target === "quanx") {
+    const supportedProxies = allProxies.filter((proxy) =>
+      ["ss", "vmess", "trojan"].includes(proxy.type)
+    );
+
+    const quanXProxies = supportedProxies.map((proxy) => {
+      if (proxy.type === "ss") {
+        // shadowsocks=example.com:443, method=chacha20-ietf-poly1305, password=pwd, obfs=http, obfs-host=example.com, tag=ss-01
+        if (proxy.plugin === "v2ray-plugin") {
+          console.log(
+            `Skip convert proxy ${proxy.name} because QuantumultX does not support Shadowsocks with v2ray-plugin`
+          );
+          return;
+        }
+        let result = `shadowsocks=${proxy.server}:${proxy.port}, method=${proxy.cipher}, password=${proxy.password}`;
+        if (proxy.plugin === "obfs") {
+          const mode = proxy?.["plugin-opts"].mode;
+          const host = proxy?.["plugin-opts"].host;
+          result = `${result}, obfs=${mode}${
+            host ? `, obfs-host=${host}` : ""
+          }`;
+        }
+        result = `${result}, tag=${proxy.name}`;
+        return result;
+      } else if (proxy.type === "vmess") {
+        // vmess=example.com:443, method=chacha20-poly1305, password=uuid, obfs=ws, obfs-uri=/path, tag=vmess-01
+        if (["h2", "http", "grpc"].includes(proxy.network)) {
+          console.log(
+            `Skip convert proxy ${proxy.name} because QuantumultX may not support Vmess(${proxy.network})`
+          );
+          return;
+        }
+        let result = `vmess=${proxy.server}:${proxy.port}, method=auto, password=${proxy.uuid}`;
+        if (proxy.network === "ws") {
+          result = `${result}, obfs=ws`;
+          if (proxy["ws-path"]) {
+            result = `${result}, obfs-uri=${proxy["ws-path"]}`;
+          }
+        }
+        if (proxy.tls) {
+          result = `${result}, over-tls=true`;
+          if (proxy.servername) {
+            result = `${result}, tls-host=${proxy.servername}`;
+          }
+          if (proxy["skip-cert-verify"]) {
+            result = `${result}, tls-verification=${!proxy[
+              "skip-cert-verify"
+            ]}`;
+          }
+        }
+        result = `${result}, tag=${proxy.name}`;
+        return result;
+      } else if (proxy.type === "trojan") {
+        // trojan=example.com:443, password=pwd, over-tls=true, tls-verification=true, tls-host=example.com, tag=trojan-01
+        if (["grpc"].includes(proxy.network)) {
+          console.log(
+            `Skip convert proxy ${proxy.name} because QuantumultX may not support Trojan(${proxy.network})`
+          );
+          return;
+        }
+        let result = `trojan=${proxy.server}:${proxy.port}, password=${proxy.password}, over-tls=true`;
+        if (proxy.sni) {
+          result = `${result}, tls-host=${proxy.sni}`;
+        }
+        if (proxy["skip-cert-verify"]) {
+          result = `${result}, tls-verification=${!proxy["skip-cert-verify"]}`;
+        }
+        result = `${result}, tag=${proxy.name}`;
+        return result;
+      }
+    });
+    const proxies = quanXProxies.filter(Boolean);
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.status(200).send(proxies.join("\n"));
   } else {
     const proxies = allProxies.filter((proxy) => {
       if (regions.length) {

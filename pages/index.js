@@ -7,15 +7,16 @@ import toast, { Toaster } from "react-hot-toast";
 export default function Home() {
   const [url, setUrl] = useState("");
   const [target, setTarget] = useState("clash");
-  const [host, setHost] = useState('');
+  const [host, setHost] = useState("");
 
   useEffect(() => {
     setHost(window.location.origin);
   }, []);
 
-  const convertedUrl = useMemo(() => `${host}/api/convert?url=${encodeURIComponent(
-    url
-  )}&target=${target}`, [host, url, target]);
+  const convertedUrl = useMemo(
+    () => `${host}/api/convert?url=${encodeURIComponent(url)}&target=${target}`,
+    [host, url, target]
+  );
 
   const urlHost = useMemo(() => {
     try {
@@ -59,6 +60,9 @@ proxy-providers:
 
 [Proxy Group]
 ${urlHost || "egroup"} = select, policy-path=${convertedUrl}
+`;
+  const quanxConfig = `[server_remote]
+${convertedUrl}, tag=${urlHost || "provider1"}, enabled=true
 `;
 
   return (
@@ -117,6 +121,7 @@ ${urlHost || "egroup"} = select, policy-path=${convertedUrl}
               >
                 <option value="clash">转换到 Clash</option>
                 <option value="surge">转换到 Surge</option>
+                <option value="quanx">转换到 Quantumult X</option>
               </select>
               <SelectorIcon className="absolute h-6 top-3.5 right-3 text-gray-400" />
             </div>
@@ -137,11 +142,16 @@ ${urlHost || "egroup"} = select, policy-path=${convertedUrl}
         {url && (
           <div className="w-full p-4 mt-4 text-gray-100 bg-gray-900 rounded-lg hidden md:block">
             {/* prettier-ignore */}
-            {target !== "surge" && (
+            {target === "clash" && (
               <pre className="whitespace-pre-wrap">{clashConfig}</pre>
             )}
 
-            {target === "surge" && <pre>{surgeConfig}</pre>}
+            {target === "surge" && (
+              <pre className="whitespace-pre-wrap">{surgeConfig}</pre>
+            )}
+            {target === "quanx" && (
+              <pre className="whitespace-pre-wrap">{quanxConfig}</pre>
+            )}
             {/* prettier-ignore */}
 
             <CopyToClipboard
