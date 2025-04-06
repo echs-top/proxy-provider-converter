@@ -5,6 +5,10 @@ module.exports = async (req, res) => {
   const url = req.query.url;
   const target = req.query.target;
   const regions = req.query.region ? req.query.region.split(",") : [];
+  const excludeFilter = req.query["exclude-filter"]
+    ? req.query["exclude-filter"].split("|")
+    : [];
+  console.log("excludeFilter", excludeFilter);
   console.log(`query: ${JSON.stringify(req.query)}`);
   if (url === undefined) {
     res.status(400).send("Missing parameter: url");
@@ -15,6 +19,7 @@ module.exports = async (req, res) => {
   let allProxies = [];
   try {
     const urls = url.split("|");
+    console.log("[urls]", urls);
     const fetchPromises = urls.map(async (singleUrl) => {
       try {
         const result = await axios({
@@ -25,10 +30,12 @@ module.exports = async (req, res) => {
           },
         });
 
+        // console.log("result", result.data);
+
         const config = YAML.parse(result.data);
         return config.proxies || [];
       } catch (error) {
-        console.error(`Error fetching/parsing ${singleUrl}:`, error.message);
+        console.error(`Error fetching/parsing ${singleUrl}`, error.message);
         return [];
       }
     });
@@ -45,6 +52,15 @@ module.exports = async (req, res) => {
   } catch (error) {
     res.status(500).send(`Unexpected error: ${error.message}`);
     return;
+  }
+
+  // Apply exclude-filter
+  if (excludeFilter.length > 0) {
+    const regex = new RegExp(excludeFilter.join("|"), "i");
+    allProxies = allProxies.filter((proxy) => {
+      const shouldKeep = !regex.test(proxy.name);
+      return shouldKeep;
+    });
   }
 
   if (target === "surge") {
