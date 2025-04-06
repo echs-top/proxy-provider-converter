@@ -142,6 +142,7 @@ module.exports = async (req, res) => {
     );
 
     const quanXProxies = supportedProxies.map((proxy) => {
+      const common = `server_check_url=http://www.gstatic.com/generate_204`;
       if (proxy.type === "ss") {
         // shadowsocks=example.com:443, method=chacha20-ietf-poly1305, password=pwd, obfs=http, obfs-host=example.com, tag=ss-01
         if (proxy.plugin === "v2ray-plugin") {
@@ -150,15 +151,8 @@ module.exports = async (req, res) => {
           );
           return;
         }
-        let result = `shadowsocks=${proxy.server}:${proxy.port}, method=${proxy.cipher}, password=${proxy.password}`;
-        if (proxy.plugin === "obfs") {
-          const mode = proxy?.["plugin-opts"].mode;
-          const host = proxy?.["plugin-opts"].host;
-          result = `${result}, obfs=${mode}${
-            host ? `, obfs-host=${host}` : ""
-          }`;
-        }
-        result = `${result}, tag=${proxy.name}`;
+        const result = `shadowsocks=${proxy.server}:${proxy.port}, method=${proxy.cipher}, password=${proxy.password}, obfs=http, obfs-host=bing.com, obfs-uri=/resource/file, tag=${proxy.name}, ${common}`;
+
         return result;
       } else if (proxy.type === "vmess") {
         // vmess=example.com:443, method=chacha20-poly1305, password=uuid, obfs=ws, obfs-uri=/path, tag=vmess-01
@@ -186,7 +180,7 @@ module.exports = async (req, res) => {
             ]}`;
           }
         }
-        result = `${result}, tag=${proxy.name}`;
+        result = `${result}, tag=${proxy.name}, ${common}`;
         return result;
       } else if (proxy.type === "trojan") {
         // trojan=example.com:443, password=pwd, over-tls=true, tls-verification=true, tls-host=example.com, tag=trojan-01
@@ -203,7 +197,7 @@ module.exports = async (req, res) => {
         if (proxy["skip-cert-verify"]) {
           result = `${result}, tls-verification=${!proxy["skip-cert-verify"]}`;
         }
-        result = `${result}, tag=${proxy.name}`;
+        result = `${result}, tag=${proxy.name}, ${common}`;
         return result;
       }
     });
