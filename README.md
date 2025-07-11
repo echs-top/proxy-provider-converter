@@ -1,3 +1,6 @@
+#fork
+修改User-Agent为clash-verge/v2.3.1
+
 # Proxy Provider Converter
 
 Fork from [qier222/proxy-provider-converter](https://github.com/qier222/proxy-provider-converter)
