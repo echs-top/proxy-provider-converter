@@ -1,7 +1,7 @@
 const YAML = require("yaml");
 const axios = require("axios");
 
-module.exports = async (req, res) => {
+module。exports = async (req, res) => {
   const url = req.query.url;
   const target = req.query.target;
   const regions = req.query.region ? req.query.region.split(",") : [];
@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
           url: singleUrl,
           headers: {
             "User-Agent":
-              "ClashX Pro/1.72.0.4 (com.west2online.ClashXPro; build:1.72.0.4; macOS 12.0.1) Alamofire/5.4.4",
+              "clash-verge/v2.3.1",
           },
         });
 
