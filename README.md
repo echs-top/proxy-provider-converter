@@ -1,5 +1,7 @@
 # Proxy Provider Converter
 
+Fork: 更换User-Agent(clash-verge/v2.3.2)
+
 Fork from [qier222/proxy-provider-converter](https://github.com/qier222/proxy-provider-converter)
 
 一个可以将 Clash 订阅转换成 Proxy Provider 和 External Group(Surge) 的工具
