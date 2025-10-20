@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
           url: singleUrl,
           headers: {
             "User-Agent":
-              "clash-verge/v2.3.2 (com.west2online.ClashXPro; build:1.72.0.4; macOS 12.0.1) Alamofire/5.4.4",
+              "clash-verge/v2.4.2 (com.west2online.ClashXPro; build:1.72.0.4; macOS 12.0.1) Alamofire/5.4.4",
           },
         });
 
